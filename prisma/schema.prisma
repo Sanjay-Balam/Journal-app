@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String      @id @default(cuid())
+  clerkUserId     String      @unique
+  email           String      @unique
+  name            String?
+  imageUrl        String?
+  currentDraft    Draft?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+
+  collections     Collection[]
+  entries         Entry[]
+}
+
+model Collection {
+  id            String        @id @default(cuid())
+  name          String        
+  description   String?
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  entries     Entry[]
+
+  @@unique([name,userId]) // One userid should not contain more than one collection
+}
+
+model Entry {
+  id            String          @id @default(cuid())
+  title         String          
+  content       String          @db.Text
+  mood          String
+  moodScore     Int
+  moodImageUrl  String?
+  userId        String
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collection    Collection      @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId  String
+}
+
+model Draft {
+  id              String            @id @default(cuid())
+  title           String?
+  content         String?           @db.Text
+  mood            String?
+  userId          String            @unique // only one draft per user is allowed
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
