@@ -279,7 +279,7 @@ export const MOODS = {
     return "You've been having a tough time.";
   };
   
-  type MoodId = keyof typeof MOODS;
+export type MoodId = keyof typeof MOODS;
   
   export const getMoodById = (moodId: MoodId) => {
     return MOODS[moodId?.toUpperCase() as MoodId];
